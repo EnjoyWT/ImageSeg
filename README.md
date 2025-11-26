@@ -1,6 +1,14 @@
 # ImageSeg
 
-一个简洁的图片网格切割工具，可以将图片按指定行列数切割成多个小图片并批量下载。
+
+
+一个简洁的图片网格切割工具，可以将图片按指定行列数切割成多个小图片并批量下载。基于 [BlockX](https://github.com/onebtcdesign/BlockX) 的 Vue 3 版本实现。
+
+
+
+## 部署到Vercel
+
+[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/EnjoyWT/ImageSeg)
 
 ## 功能特性
 
