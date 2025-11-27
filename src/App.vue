@@ -1,4 +1,5 @@
 <template>
+  <div>
   <!-- Mobile Navbar -->
   <div class="md:hidden">
     <Navbar :mobile="true" />
@@ -30,7 +31,6 @@
       </div>
 
       <!-- LEFT PANEL: Preview / Upload -->
-      <!-- Mobile: fixed height (50vh) or min-height to ensure image shows. Desktop: full height. -->
       <div
         class="flex-1 bg-white rounded-[24px] md:rounded-[32px] border border-apple-border/60 p-3 md:p-5 shadow-sm relative overflow-hidden flex flex-col h-[55vh] md:h-full min-h-[400px]"
       >
@@ -38,13 +38,9 @@
           class="flex justify-between items-center mb-2 flex-shrink-0 min-h-[32px]"
         >
           <div class="flex items-center gap-2">
-            <div class="flex gap-1.5 mr-2">
-              <div class="w-3 h-3 rounded-full bg-red-400"></div>
-              <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
-              <div class="w-3 h-3 rounded-full bg-green-400"></div>
-            </div>
+          
             <span
-              class="text-xs font-medium text-apple-subtext uppercase tracking-widest hidden sm:inline-block"
+              class="pl-2 text-xs font-medium text-apple-subtext uppercase tracking-widest hidden sm:inline-block"
             >
               预览
             </span>
@@ -83,8 +79,18 @@
         </div>
 
         <div class="flex-1 min-h-0 w-full relative">
+          <!-- 网格模式预览 -->
           <GridPreview
-            v-if="imageInfo"
+            v-if="imageInfo && settings.splitMode === 'grid'"
+            :imageInfo="imageInfo"
+            :settings="settings"
+            :selectedIndices="selectedIndices"
+            @selectionChange="setSelectedIndices"
+            @settingsChange="handleSettingsChange"
+          />
+          <!-- 分割线模式预览 -->
+          <LinesPreview
+            v-else-if="imageInfo && settings.splitMode === 'lines'"
             :imageInfo="imageInfo"
             :settings="settings"
             :selectedIndices="selectedIndices"
@@ -112,7 +118,7 @@
           @update:settings="settings = $event"
           @reset="handleReset"
           :selectedCount="selectedIndices.size"
-          :totalSlices="settings.rows * settings.cols"
+          :totalSlices="totalSlices"
           :processingState="processingState"
           @update:processingState="processingState = $event"
           :selectedIndices="selectedIndices"
@@ -120,13 +126,15 @@
       </div>
     </div>
   </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import Navbar from "./components/Navbar.vue";
 import ImageUploader from "./components/ImageUploader.vue";
 import GridPreview from "./components/GridPreview.vue";
+import LinesPreview from "./components/LinesPreview.vue";
 import Sidebar from "./components/Sidebar.vue";
 import type { ImageInfo, GridSettings, ProcessingState } from "./types";
 import { DEFAULT_SETTINGS } from "./constants";
@@ -208,4 +216,16 @@ const handleSettingsChange = (newSettings: Partial<GridSettings>) => {
 const setSelectedIndices = (indices: Set<number>) => {
   selectedIndices.value = indices;
 };
+
+// 计算总切片数（根据模式不同）
+const totalSlices = computed(() => {
+  if (settings.value.splitMode === 'grid') {
+    return settings.value.rows * settings.value.cols;
+  } else {
+    // lines 模式：(水平线数+1) * (垂直线数+1)
+    const hCount = settings.value.horizontalLines.length + 1;
+    const vCount = settings.value.verticalLines.length + 1;
+    return hCount * vCount;
+  }
+});
 </script>

@@ -6,8 +6,50 @@
         isDisabled ? 'opacity-75' : 'opacity-100',
       ]"
     >
-    <!-- 1. Slicing Parameters -->
+    <!-- 0. Split Mode Selector -->
     <Card class="py-4 px-5">
+      <div class="flex items-center justify-between mb-3">
+        <h4
+          class="font-semibold text-xs text-apple-subtext uppercase tracking-wider flex items-center gap-2"
+        >
+          <Layers :size="14" /> 分割模式
+        </h4>
+      </div>
+      <div class="flex bg-apple-gray p-1 rounded-xl">
+        <button
+          :disabled="isDisabled"
+          @click="handleInputChange('splitMode', 'grid')"
+          :class="[
+            'flex-1 py-2 text-xs font-medium rounded-lg transition-all flex items-center justify-center gap-1.5',
+            settings.splitMode === 'grid'
+              ? 'bg-white shadow-sm text-apple-text'
+              : 'text-apple-subtext hover:text-apple-text',
+          ]"
+        >
+          <Grid :size="14" />
+          网格切割
+        </button>
+        <button
+          :disabled="isDisabled"
+          @click="handleInputChange('splitMode', 'lines')"
+          :class="[
+            'flex-1 py-2 text-xs font-medium rounded-lg transition-all flex items-center justify-center gap-1.5',
+            settings.splitMode === 'lines'
+              ? 'bg-white shadow-sm text-apple-text'
+              : 'text-apple-subtext hover:text-apple-text',
+          ]"
+        >
+          <SplitSquareHorizontal :size="14" />
+          自由分割
+        </button>
+      </div>
+      <p class="text-[9px] text-apple-subtext text-center mt-2">
+        {{ settings.splitMode === 'grid' ? '按行列均匀切割图片' : '自定义分割线位置' }}
+      </p>
+    </Card>
+
+    <!-- 1. Slicing Parameters (Grid Mode Only) -->
+    <Card v-if="settings.splitMode === 'grid'" class="py-4 px-5">
       <div class="flex items-center justify-between mb-3">
         <h4
           class="font-semibold text-xs text-apple-subtext uppercase tracking-wider flex items-center gap-2"
@@ -62,6 +104,65 @@
         <span class="font-semibold text-apple-text text-sm">{{
           settings.cols * settings.rows
         }}</span>
+      </div>
+    </Card>
+
+    <!-- 1b. Lines Mode Controls -->
+    <Card v-if="settings.splitMode === 'lines'" class="py-4 px-5">
+      <div class="flex items-center justify-between mb-3">
+        <h4
+          class="font-semibold text-xs text-apple-subtext uppercase tracking-wider flex items-center gap-2"
+        >
+          <SplitSquareHorizontal :size="14" /> 分割线控制
+        </h4>
+        <button
+          @click="clearAllLines"
+          :disabled="isDisabled"
+          class="text-[10px] text-apple-blue hover:underline disabled:opacity-50"
+        >
+          清除全部
+        </button>
+      </div>
+      
+      <div class="space-y-3">
+        <!-- Add Lines Buttons -->
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            @click="addHorizontalLine"
+            :disabled="isDisabled"
+            class="flex items-center justify-center gap-1.5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+          >
+            <Minus :size="14" />
+            添加水平线
+          </button>
+          <button
+            @click="addVerticalLine"
+            :disabled="isDisabled"
+            class="flex items-center justify-center gap-1.5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+          >
+            <SeparatorVertical :size="14" />
+            添加垂直线
+          </button>
+        </div>
+
+        <!-- Lines Count -->
+        <div class="flex justify-between items-center text-xs pt-2 border-t border-apple-border/40">
+          <div class="flex items-center gap-3">
+            <span class="text-red-500">水平线: {{ settings.horizontalLines.length }}</span>
+            <span class="text-blue-500">垂直线: {{ settings.verticalLines.length }}</span>
+          </div>
+        </div>
+
+        <div
+          class="flex justify-between items-center"
+        >
+          <span class="text-xs text-apple-subtext">切片总数</span>
+          <span class="font-semibold text-apple-text text-sm">{{ linesSliceCount }}</span>
+        </div>
+
+        <p class="text-[9px] text-apple-subtext text-center">
+          提示：可在预览区拖拽分割线调整位置，点击线上的 × 删除
+        </p>
       </div>
     </Card>
 
@@ -390,7 +491,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { GridSettings, ImageInfo, ProcessingState } from "../types";
+import type { GridSettings, ImageInfo, ProcessingState, SplitLine } from "../types";
 import Card from "./ui/Card.vue";
 import Button from "./ui/Button.vue";
 import {
@@ -404,6 +505,10 @@ import {
   RefreshCw,
   Crop,
   FileText,
+  Layers,
+  SplitSquareHorizontal,
+  
+  SeparatorVertical
 } from "lucide-vue-next";
 import { processAndDownload } from "../utils/imageProcessing";
 
@@ -424,6 +529,51 @@ const emit = defineEmits<{
 
 const isDisabled = computed(() => !props.imageInfo);
 const formats = ["png", "jpg", "webp"] as const;
+
+// 计算 lines 模式下的切片数
+const linesSliceCount = computed(() => {
+  const hCount = props.settings.horizontalLines.length + 1;
+  const vCount = props.settings.verticalLines.length + 1;
+  return hCount * vCount;
+});
+
+// 生成唯一ID
+const generateId = () => Math.random().toString(36).substring(2, 9);
+
+// 添加水平线
+const addHorizontalLine = () => {
+  if (!props.imageInfo) return;
+  const newLine: SplitLine = {
+    id: generateId(),
+    position: props.imageInfo.height / 2,
+  };
+  emit("update:settings", {
+    ...props.settings,
+    horizontalLines: [...props.settings.horizontalLines, newLine],
+  });
+};
+
+// 添加垂直线
+const addVerticalLine = () => {
+  if (!props.imageInfo) return;
+  const newLine: SplitLine = {
+    id: generateId(),
+    position: props.imageInfo.width / 2,
+  };
+  emit("update:settings", {
+    ...props.settings,
+    verticalLines: [...props.settings.verticalLines, newLine],
+  });
+};
+
+// 清除所有分割线
+const clearAllLines = () => {
+  emit("update:settings", {
+    ...props.settings,
+    horizontalLines: [],
+    verticalLines: [],
+  });
+};
 
 const handleDownload = async () => {
   if (!props.imageInfo) return;

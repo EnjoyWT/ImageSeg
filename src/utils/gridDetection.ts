@@ -64,20 +64,20 @@ export const suggestGridDimensions = (
   if (aspectRatio > 1.3 && aspectRatio < 1.8) {
     // 16:9 or similar landscape
     return {
-      rows: 3,
-      cols: 4,
+      rows: 4,
+      cols: 6,
       confidence: "high",
-      reason: "16:9 横向图片，建议 3×4 网格",
+      reason: "16:9 横向图片，建议 6 x 4 网格",
     };
   }
 
   if (aspectRatio > 0.5 && aspectRatio < 0.8) {
     // Portrait orientation (e.g., 3:4, 9:16)
     return {
-      rows: 4,
-      cols: 3,
+      rows: 6,
+      cols: 4,
       confidence: "high",
-      reason: "9:16 竖向图片，建议 4×3 网格",
+      reason: "9:16 竖向图片，建议 4×6 网格",
     };
   }
 

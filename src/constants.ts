@@ -18,6 +18,9 @@ export const DEFAULT_SETTINGS: GridSettings = {
   paddingBottom: 0,
   paddingLeft: 0,
   filePrefix: "",
+  splitMode: "grid",
+  horizontalLines: [],
+  verticalLines: [],
 };
 
 export const SUPPORTED_FORMATS = [

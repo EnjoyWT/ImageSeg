@@ -1,6 +1,7 @@
 export type ExportFormat = 'png' | 'jpg' | 'webp';
 export type CropMode = 'original' | 'square';
 export type SquareFit = 'center' | 'stretch';
+export type SplitMode = 'grid' | 'lines';
 
 export interface ImageInfo {
   src: string;
@@ -8,6 +9,12 @@ export interface ImageInfo {
   width: number;
   height: number;
   originalName: string;
+}
+
+// 分割线定义 (位置为像素值)
+export interface SplitLine {
+  id: string;
+  position: number; // 像素位置
 }
 
 export interface GridSettings {
@@ -30,6 +37,11 @@ export interface GridSettings {
   paddingLeft: number;
   // File naming
   filePrefix: string;
+  // 分割模式
+  splitMode: SplitMode;
+  // 分割线 (仅在 lines 模式下使用)
+  horizontalLines: SplitLine[];
+  verticalLines: SplitLine[];
 }
 
 export interface ProcessingState {
