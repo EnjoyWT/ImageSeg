@@ -30,7 +30,15 @@
           >
             <Sparkles :size="18" />
           </button>
-        
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            @click="showTutorial = true"
+            class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-apple-gray text-apple-subtext hover:text-apple-text transition-all duration-200"
+            aria-label="AI Tutorial"
+          >
+            <Sparkles :size="18" />
+          </button>
         </div>
       </div>
     </nav>
@@ -58,7 +66,6 @@
       <!-- Divider -->
       <div class="w-full h-px bg-apple-border/40" />
 
-      <!-- Icons -->
       <div class="flex flex-col items-center gap-3">
         <button
           @click="showTutorial = true"
@@ -67,7 +74,18 @@
         >
           <Sparkles :size="20" />
         </button>
-    
+      </div>
+      <div class="w-full h-px bg-apple-border/40" />
+
+      <!-- Icons -->
+      <div class="flex flex-col items-center gap-3">
+        <button
+          @click="openGithub"
+          class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-apple-gray text-apple-subtext text-apple-text transition-all duration-200"
+          aria-label="AI Tutorial"
+        >
+          <Github :size="20" />
+        </button>
       </div>
     </nav>
     <TutorialModal :isOpen="showTutorial" @close="showTutorial = false" />
@@ -76,7 +94,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { Sparkles } from "lucide-vue-next";
+import { Sparkles, Github } from "lucide-vue-next";
 import TutorialModal from "./TutorialModal.vue";
 
 defineProps<{
@@ -84,6 +102,9 @@ defineProps<{
 }>();
 
 const showTutorial = ref(false);
+const openGithub = () => {
+  window.open("https://github.com/EnjoyWT/ImageSeg", "_blank");
+};
 </script>
 
 <script lang="ts">
