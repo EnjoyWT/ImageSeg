@@ -31,13 +31,14 @@
             <Sparkles :size="18" />
           </button>
         </div>
+
         <div class="flex items-center gap-2">
           <button
-            @click="showTutorial = true"
+          @click="openGithub"
             class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-apple-gray text-apple-subtext hover:text-apple-text transition-all duration-200"
             aria-label="AI Tutorial"
           >
-            <Sparkles :size="18" />
+            <Github :size="18" />
           </button>
         </div>
       </div>
@@ -75,6 +76,7 @@
           <Sparkles :size="20" />
         </button>
       </div>
+
       <div class="w-full h-px bg-apple-border/40" />
 
       <!-- Icons -->
