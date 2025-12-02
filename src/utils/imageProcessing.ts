@@ -126,17 +126,22 @@ export const processAndDownload = async (
       const sliceCtx = sliceCanvas.getContext("2d");
       if (!sliceCtx) throw new Error("Ctx error");
 
+      // 目标输出尺寸 240x240
+      const targetSize = 240;
+      sliceCanvas.width = targetSize;
+      sliceCanvas.height = targetSize;
+
       for (const index of slicesToExport) {
         const region = regions[index];
         if (!region) continue;
 
-        // 应用边距
-        const outputWidth = Math.max(1, Math.round(region.width - paddingLeft - paddingRight));
-        const outputHeight = Math.max(1, Math.round(region.height - paddingTop - paddingBottom));
+        // 计算实际内容尺寸
+        const contentWidth = Math.max(1, Math.round(region.width - paddingLeft - paddingRight));
+        const contentHeight = Math.max(1, Math.round(region.height - paddingTop - paddingBottom));
 
-        sliceCanvas.width = outputWidth;
-        sliceCanvas.height = outputHeight;
-        sliceCtx.clearRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+        // 清空画布并填充白色背景
+        sliceCtx.fillStyle = "#ffffff";
+        sliceCtx.fillRect(0, 0, targetSize, targetSize);
 
         // 从变换后的画布裁剪，应用边距
         const srcX = region.x + paddingLeft;
@@ -144,10 +149,14 @@ export const processAndDownload = async (
         const srcWidth = region.width - paddingLeft - paddingRight;
         const srcHeight = region.height - paddingTop - paddingBottom;
 
+        // 计算居中位置
+        const destX = Math.floor((targetSize - contentWidth) / 2);
+        const destY = Math.floor((targetSize - contentHeight) / 2);
+
         sliceCtx.drawImage(
           transformedCanvas,
           srcX, srcY, srcWidth, srcHeight,
-          0, 0, outputWidth, outputHeight
+          destX, destY, contentWidth, contentHeight
         );
 
         const blob = await new Promise<Blob | null>((resolve) => {
@@ -222,27 +231,35 @@ export const processAndDownload = async (
     const sliceCtx = sliceCanvas.getContext("2d");
     if (!sliceCtx) throw new Error("Ctx error");
 
-    const outputWidth = Math.max(1, Math.floor(sliceWidth - paddingLeft - paddingRight));
-    const outputHeight = Math.max(1, Math.floor(sliceHeight - paddingTop - paddingBottom));
+    const sliceContentWidth = Math.max(1, Math.floor(sliceWidth - paddingLeft - paddingRight));
+    const sliceContentHeight = Math.max(1, Math.floor(sliceHeight - paddingTop - paddingBottom));
 
-    sliceCanvas.width = outputWidth;
-    sliceCanvas.height = outputHeight;
+    // 目标输出尺寸 240x240，将切割的内容居中放置
+    const targetSize = 240;
+    sliceCanvas.width = targetSize;
+    sliceCanvas.height = targetSize;
 
     for (const index of slicesToExport) {
       const row = Math.floor(index / cols);
       const col = index % cols;
 
-      sliceCtx.clearRect(0, 0, outputWidth, outputHeight);
+      // 清空画布并填充白色背景
+      sliceCtx.fillStyle = "#ffffff";
+      sliceCtx.fillRect(0, 0, targetSize, targetSize);
 
       const srcX = col * sliceWidth + paddingLeft;
       const srcY = row * sliceHeight + paddingTop;
       const srcWidth = sliceWidth - paddingLeft - paddingRight;
       const srcHeight = sliceHeight - paddingTop - paddingBottom;
 
+      // 计算居中位置
+      const destX = Math.floor((targetSize - sliceContentWidth) / 2);
+      const destY = Math.floor((targetSize - sliceContentHeight) / 2);
+
       sliceCtx.drawImage(
         canvas,
         srcX, srcY, srcWidth, srcHeight,
-        0, 0, outputWidth, outputHeight
+        destX, destY, sliceContentWidth, sliceContentHeight
       );
 
       const blob = await new Promise<Blob | null>((resolve) => {

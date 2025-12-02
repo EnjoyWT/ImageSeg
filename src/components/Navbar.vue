@@ -34,7 +34,7 @@
 
         <div class="flex items-center gap-2">
           <button
-          @click="openGithub"
+            @click="openGithub"
             class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-apple-gray text-apple-subtext hover:text-apple-text transition-all duration-200"
             aria-label="AI Tutorial"
           >
@@ -83,7 +83,7 @@
       <div class="flex flex-col items-center gap-3">
         <button
           @click="openGithub"
-          class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-apple-gray text-apple-subtext text-apple-text transition-all duration-200"
+          class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-apple-gray text-apple-text transition-all duration-200"
           aria-label="AI Tutorial"
         >
           <Github :size="20" />
